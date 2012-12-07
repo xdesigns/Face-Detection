@@ -1,0 +1,12 @@
+mask=maskGenerator(20,20);
+mask(1,18)=0;
+mask(2,19)=0;
+mask(3,20)=0;
+mask(18,1)=0;
+mask(19,2)=0;
+mask(20,3)=0;
+mask(18,20)=0;
+mask(19,19)=0;
+mask(19,20)=0;
+mask(20,18)=0;
+mask(20,19)=0;

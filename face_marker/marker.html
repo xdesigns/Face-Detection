@@ -1,0 +1,190 @@
+<html>
+	<head>
+		<title>Face Detection: Face Database Creator</title>
+		<style>
+		body{
+			margin:0px;
+			text-align:center;
+		}
+		
+		.label{
+			font-weight:bold;
+			font-size:12px;
+			color:#777777;
+		}
+		
+		#header{
+			background-color:#eeeeee;
+			border-width:1px;
+			border-color:#777777;
+			border-style:dashed;
+			width:100%;
+			padding-top:5px;
+			padding-bottom:5px;
+			display:block;
+			text-align:center;
+		}
+		
+		#values{
+			color:#777777;
+			font-weight:bold;
+			font-size:15px;
+			background-color:#eeeeee;
+			border-width:1px;
+			border-color:#777777;
+			border-style:dashed;
+			width:100%;
+		}
+		
+		#container{	
+			background-color:#eeeeee;
+			text-align:left;
+			width:100%;
+		}
+		
+		input{
+			background-color:#eeeeee;
+			border-width:1px;
+			border-color:#777777;
+			border-style:solid;
+		}
+		</style>
+		<script>
+			var folder="images/"
+			var startImage=1;
+			var endImage=100;
+			var totalImages=100;
+			var width=120;
+			var height=120;
+			var noDataPoints=4;
+			var clickHistory=new Array(totalImages*noDataPoints);
+			var front=-1;
+			var rear=-1;
+			var noClicks=new Array(totalImages);
+			var data=new Array(totalImages);
+			function init(){
+				front=-1;
+				rear=-1;
+				var ele=document.getElementById('container');
+				ele.innerHTML="";
+				var filename;
+				for (i=startImage;i<=endImage;i+=2){
+					if (typeof noClicks[i-1]=="undefined"||noClicks[i-1]!=noDataPoints){
+						noClicks[i-1]=0;
+						data[i-1]="";
+						var newImg=document.createElement('img');
+						if (i<10)
+							filename=folder+'00'+i+'.jpg';
+						else if(i<100)
+							filename=folder+'0'+i+'.jpg';
+						else
+							filename=folder+i+'.jpg';
+						newImg.setAttribute('id',i);
+						newImg.setAttribute('src',filename);
+						newImg.setAttribute('width',width+'px');
+						newImg.setAttribute('height',height+'px');
+						newImg.setAttribute('onclick','addValue(event)');
+						ele.appendChild(newImg);
+					}
+				}
+			}	
+			function addValue(e){		
+				index=e.target.getAttribute('id').valueOf()-1;
+				if (rear==-1){
+					++front;
+					++rear;
+					
+				}
+				else if(front<=rear){
+					if(rear<totalImages*noDataPoints){
+						++rear;
+					}
+					else{
+						rear=0;
+						++front;
+					}
+				}
+				else{
+					if(front<totalImages*noDataPoints){
+						++front;
+						++rear;
+					}
+					else{
+						front=0;
+						++rear;
+					}
+				}
+			
+				clickHistory[rear]=index;
+				
+				if (noClicks[index]<noDataPoints){
+					if (noClicks[index]==0)
+						data[index]=(index+1)+".jpg";
+					noClicks[index]++;
+					data[index]+=" "+Math.round((e.clientX+document.body.scrollLeft-e.target.offsetLeft)*(e.target.naturalWidth/width))+" "+Math.round((e.clientY+document.body.scrollTop-e.target.offsetTop)*(e.target.naturalHeight/height));
+					
+					if (noClicks[index]==noDataPoints)
+						e.target.style.display='none';	
+				}
+			}
+			
+			function undo(){
+				
+				if (rear!=-1){
+					
+					document.getElementById((clickHistory[rear]+1)).style.display='inline';
+					noClicks[clickHistory[rear]]=0;
+					data[clickHistory[rear]]="";
+					if (front<=rear){
+						
+						if (rear==front){
+							front=-1;
+							rear=-1
+						}else
+							--rear;
+					}
+					else{
+						if (rear!=0)
+							--rear;
+						else
+							rear=totalImages*noDataPoints-1;
+					}
+									
+				}
+			}
+			
+			function submit(){
+				document.getElementById("values").style.display="block";
+				document.getElementById("values").innerHTML="";
+				for (i=startImage;i<=endImage;++i){
+					document.getElementById("values").appendChild(document.createTextNode(data[i-1]+"\n"));
+					document.getElementById("values").appendChild(document.createElement('br'));
+				}
+				
+			}
+			
+			function hide(){
+				document.getElementById("values").innerHTML="";
+			}
+		</script>
+	</head>
+	<body onload="init()">
+		<span id="header">
+			<span class="label" style="font-size:20px;color:#fe6790">Face Db Creator v1.0 :: </span>
+			<span class="label">Start Image:</span>
+			<input type="text" value="1" onchange="startImage=this.value">
+			<span class="label">End Image:</span>
+			<input type="text" value="100" onchange="endImage=this.value">
+			<input type="button" value="Display" onclick="init()">
+			<input type="button" value="Undo" onclick="undo()">
+			<input type="button" value="Submit" onclick="submit()">
+			<input type="button" value="Hide" onclick="hide()">
+			<span class="label">Folder Path:</span>
+			<input type="text" value="images/" onchange="folder=this.value">
+			
+		</span>
+		<div id="values"></div>
+		<div id="container"></div>
+		
+	</body>
+</html>
